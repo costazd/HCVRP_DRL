@@ -197,7 +197,7 @@ class AttentionModel(nn.Module):
         
 
         log_p = _log_p.gather(2, torch.tensor(a).unsqueeze(-1)).squeeze(-1)
-        log_p_veh = _log_p_veh.gather(2, torch.tensor(veh_list).cuda().unsqueeze(-1)).squeeze(-1)
+        log_p_veh = _log_p_veh.gather(2, torch.tensor(veh_list).unsqueeze(-1)).squeeze(-1)
 
         # Optional: mask out actions irrelevant to objective so they do not get reinforced
         if mask is not None:
@@ -214,7 +214,7 @@ class AttentionModel(nn.Module):
         if self.is_hcvrp:
             # capa = input['capacity'][:, None].expand(input['capacity'].size(0), input['loc'].size(1)+1, input['capacity'].size(-1))
             demand = torch.tensor([(input['demand'] / input['capacity'][0:1, veh]).tolist() for veh in
-                                   range(input['capacity'].size(-1))]).transpose(0, 1).transpose(1, 2).cuda()
+                                   range(input['capacity'].size(-1))]).transpose(0, 1).transpose(1, 2)
 
             return torch.cat(  # [batch_size, graph_size+1, embed_dim]
                 (
@@ -295,7 +295,7 @@ class AttentionModel(nn.Module):
                     .expand_as(state.coords[:, 0:num_veh, :])
             ).transpose(0, 1)  # [batch_size, 2]
 
-            mean_tour = torch.zeros([batch_size, 3 * embed_dim]).float().cuda()
+            mean_tour = torch.zeros([batch_size, 3 * embed_dim]).float()
             veh_context = torch.cat(  # [batch_size, num_veh, 5]
                 (
                     tour_dis[:, 0].unsqueeze(-1) / SPEED[0],  # [batch_size, num_veh]
@@ -512,7 +512,7 @@ class AttentionModel(nn.Module):
                     (
                         embeddings[:, 0:1, :].expand(batch_size, num_veh, embeddings.size(-1)),
                         # used capacity is 0 after visiting depot
-                        torch.tensor(self.problem.VEHICLE_CAPACITY)[None, :, None].cuda() - torch.zeros_like(
+                        torch.tensor(self.problem.VEHICLE_CAPACITY)[None, :, None] - torch.zeros_like(
                             state.used_capacity[:, :, None])
                     ),
                     -1
@@ -527,7 +527,7 @@ class AttentionModel(nn.Module):
                                 .view(batch_size, num_steps, 1)
                                 .expand(batch_size, num_steps, embeddings.size(-1))
                         ).view(batch_size, num_steps, embeddings.size(-1)),  # [batch_size, num_step, embed_dim]
-                        (torch.tensor(self.problem.VEHICLE_CAPACITY)[None, veh].cuda() - state.used_capacity[torch.arange(batch_size), veh]).transpose(0, 1).unsqueeze(-1)
+                        (torch.tensor(self.problem.VEHICLE_CAPACITY)[None, veh] - state.used_capacity[torch.arange(batch_size), veh]).transpose(0, 1).unsqueeze(-1)
                     ),
                     -1
                 )

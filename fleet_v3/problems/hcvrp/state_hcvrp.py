@@ -157,7 +157,7 @@ class StateHCVRP(NamedTuple):
         exceeds_cap = (self.demand[self.ids, 1:] + (self.used_capacity[torch.arange(batch_size), veh].unsqueeze(-1))[
             ..., None].expand_as(self.demand[self.ids, 1:]) >
                        ((torch.tensor(self.VEHICLE_CAPACITY)[None, :].expand(batch_size,
-                                                                             len(self.VEHICLE_CAPACITY)).cuda())[
+                                                                             len(self.VEHICLE_CAPACITY)))[
                             self.ids, veh][0].unsqueeze(-1))[..., None].expand_as(
                            self.demand[self.ids, 1:]))  # �ҳ���һ��demand�����node, ids [batch_size,1]
 
